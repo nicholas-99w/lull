@@ -1,0 +1,78 @@
+#!/bin/bash
+# Lull package postinstall. Idempotent and upgrade-safe: can run
+# any number of times, over a fresh install or a running older version.
+#   1. fix ownership/permissions (root:wheel, dirs 755, files 644, binaries 755)
+#   2. create state/log dirs and the lullctl symlink
+#   3. bootout any old daemon, bootstrap the new one
+#   4. bootstrap the agent into every logged-in GUI session
+# Exits non-zero only if the daemon can't be started (a genuine failure Jamf
+# should report). Agent problems are not fatal: lulld supervises and
+# re-bootstraps missing agents itself.
+
+DAEMON_LABEL="au.com.nickit.lulld"
+AGENT_LABEL="au.com.nickit.lull"
+INSTALL_ROOT="/Library/Application Support/Lull"
+DAEMON_PLIST="/Library/LaunchDaemons/$DAEMON_LABEL.plist"
+AGENT_PLIST="/Library/LaunchAgents/$AGENT_LABEL.plist"
+TARGET="${3:-/}"
+log() { echo "lull postinstall: $*"; }
+
+[[ "$TARGET" == "/" ]] || { log "target is $TARGET, not the boot volume; not starting services"; exit 0; }
+
+# 1. Permissions. launchd refuses plists that aren't root-owned and
+#    non-writable by others; the XPC pin refuses an install folder a user could
+#    write to (CodeSigningRequirement.insecurePathProblem).
+/usr/sbin/chown -R root:wheel "$INSTALL_ROOT" "$DAEMON_PLIST" "$AGENT_PLIST"
+/bin/chmod -R go-w "$INSTALL_ROOT"
+/bin/chmod 755 "$INSTALL_ROOT" "$INSTALL_ROOT/bin" "$INSTALL_ROOT/Branding"
+/bin/chmod 755 "$INSTALL_ROOT/bin/lulld" "$INSTALL_ROOT/bin/lullctl" "$INSTALL_ROOT/bin/uninstall.sh"
+/bin/chmod 644 "$DAEMON_PLIST" "$AGENT_PLIST"
+/usr/bin/xattr -dr com.apple.quarantine "$INSTALL_ROOT" 2>/dev/null
+
+# 2. State and logs (lulld also creates these; doing it here gives fixed modes).
+/bin/mkdir -p /var/db/lull /var/log/lull
+/usr/sbin/chown root:wheel /var/db/lull /var/log/lull
+/bin/chmod 755 /var/db/lull /var/log/lull
+# Convenience symlink, only where a non-root user can't replace it: on Macs
+# where Homebrew once lived there /usr/local/bin is often user-owned, and a swapped symlink
+# would run someone else's program when an admin uses `sudo lullctl`. Scripts
+# and Jamf policies always use the full path in INSTALL_ROOT/bin.
+/bin/mkdir -p /usr/local/bin
+if [[ "$(/usr/bin/stat -f '%u' /usr/local/bin)" == "0" && -z "$(/usr/bin/find /usr/local/bin -maxdepth 0 -perm +022)" ]]; then
+    /bin/ln -sfn "$INSTALL_ROOT/bin/lullctl" /usr/local/bin/lullctl
+else
+    /bin/rm -f /usr/local/bin/lullctl 2>/dev/null
+    log "note: /usr/local/bin isn't root-only; skipped the lullctl symlink (use $INSTALL_ROOT/bin/lullctl)"
+fi
+
+# 3. Daemon. bootout first so a re-run or upgrade loads the new plist/binary.
+/bin/launchctl bootout "system/$DAEMON_LABEL" 2>/dev/null
+# A previous `launchctl disable` would make bootstrap fail; clear it.
+/bin/launchctl enable "system/$DAEMON_LABEL" 2>/dev/null
+started=0
+for attempt in 1 2 3; do
+    if /bin/launchctl bootstrap system "$DAEMON_PLIST" 2>/dev/null; then started=1; break; fi
+    # Already loaded (e.g. bootout still finishing): kickstart instead.
+    if /bin/launchctl print "system/$DAEMON_LABEL" >/dev/null 2>&1; then
+        /bin/launchctl kickstart -k "system/$DAEMON_LABEL" && { started=1; break; }
+    fi
+    sleep 1
+done
+if [[ $started -ne 1 ]]; then
+    log "ERROR: could not start $DAEMON_LABEL (if Login Items shows Lull disabled, deploy the Service Management profile)"
+    exit 1
+fi
+log "lulld started"
+
+# 4. Agent in every GUI session (loginwindow runs as each logged-in user).
+for uid in $(/bin/ps -axo uid=,comm= | /usr/bin/awk '$2 ~ /loginwindow$/ {print $1}' | /usr/bin/sort -u); do
+    [[ "$uid" -eq 0 ]] && continue
+    /bin/launchctl bootout "gui/$uid/$AGENT_LABEL" 2>/dev/null
+    /bin/launchctl enable "gui/$uid/$AGENT_LABEL" 2>/dev/null
+    if /bin/launchctl bootstrap "gui/$uid" "$AGENT_PLIST" 2>/dev/null; then
+        log "agent started for uid $uid"
+    else
+        log "warning: agent not started for uid $uid; lulld will retry"
+    fi
+done
+exit 0

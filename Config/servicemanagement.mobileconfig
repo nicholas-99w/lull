@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Managed Login Items (com.apple.servicemanagement, macOS 13+, device channel,
+  needs user-approved MDM). Verified against Apple's device-management schema
+  (mdm/profiles/com.apple.servicemanagement.yaml, release branch, 2026-09).
+
+  Matching items are approved automatically and users can't turn them off in
+  Login Items. Label and BundleIdentifier rules don't depend on the code
+  signature, so they work without an Apple Developer account.
+  VERIFY on the test Mac: that these rules lock ad-hoc signed items
+  (`sudo sfltool dumpbtm` lists the managed rules and item states).
+
+  These rules match both ad-hoc and Developer ID signed builds, so this
+  profile is safe whichever way Lull is signed. For Developer ID signed builds,
+  the Jamf kit also contains servicemanagement-teamid.mobileconfig (from
+  servicemanagement-teamid.mobileconfig.template), which also requires the
+  Team ID. Don't add a TeamIdentifier sub-key here: ad-hoc builds could then
+  never match.
+-->
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadType</key>
+			<string>com.apple.servicemanagement</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>PayloadIdentifier</key>
+			<string>au.com.nickit.lull.servicemanagement.C2249080-C772-49D4-BA7F-D14F316B38FA</string>
+			<key>PayloadUUID</key>
+			<string>C2249080-C772-49D4-BA7F-D14F316B38FA</string>
+			<key>PayloadDisplayName</key>
+			<string>Lull background items</string>
+			<key>Rules</key>
+			<array>
+				<dict>
+					<key>RuleType</key>
+					<string>Label</string>
+					<key>RuleValue</key>
+					<string>au.com.nickit.lulld</string>
+					<key>Comment</key>
+					<string>Lull daemon (LaunchDaemon label)</string>
+				</dict>
+				<dict>
+					<key>RuleType</key>
+					<string>Label</string>
+					<key>RuleValue</key>
+					<string>au.com.nickit.lull</string>
+					<key>Comment</key>
+					<string>Lull lock screen (LaunchAgent label)</string>
+				</dict>
+				<dict>
+					<key>RuleType</key>
+					<string>BundleIdentifier</string>
+					<key>RuleValue</key>
+					<string>au.com.nickit.lull</string>
+					<key>Comment</key>
+					<string>Lull.app (also suppresses the macOS 26 'keep running?' prompt)</string>
+				</dict>
+				<dict>
+					<key>RuleType</key>
+					<string>BundleIdentifier</string>
+					<key>RuleValue</key>
+					<string>au.com.nickit.lulld</string>
+					<key>Comment</key>
+					<string>lulld signing identifier</string>
+				</dict>
+			</array>
+		</dict>
+	</array>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+	<key>PayloadIdentifier</key>
+	<string>au.com.nickit.lull.servicemanagement-profile.DF2C4D1E-2EB7-4A3D-8739-D8B44C6356D3</string>
+	<key>PayloadUUID</key>
+	<string>DF2C4D1E-2EB7-4A3D-8739-D8B44C6356D3</string>
+	<key>PayloadDisplayName</key>
+	<string>Lull: managed login items</string>
+	<key>PayloadDescription</key>
+	<string>Stops users turning Lull off in System Settings &gt; General &gt; Login Items.</string>
+	<key>PayloadScope</key>
+	<string>System</string>
+	<key>PayloadRemovalDisallowed</key>
+	<true/>
+</dict>
+</plist>

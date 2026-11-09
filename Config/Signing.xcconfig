@@ -1,0 +1,36 @@
+// Signing settings. The defaults sign everything ad-hoc ("-"), which works for
+// Jamf policy deployment and needs no Apple account (SECURITY.md >
+// How the parts trust each other).
+//
+// To sign with a Developer ID, copy Signing.local.xcconfig.example to
+// Signing.local.xcconfig (gitignored) and fill it in, or override on the
+// command line:
+//   make release APPLE_TEAM_ID=ABCDE12345 SIGNING_IDENTITY="Developer ID Application: ..."
+// The local file keeps the identity (which contains the signer's name) and the
+// Team ID out of the repository, so other people can still build ad-hoc.
+APPLE_TEAM_ID =
+SIGNING_IDENTITY = -
+LULL_BUNDLE_ID_PREFIX = au.com.nickit
+
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = $(SIGNING_IDENTITY)
+DEVELOPMENT_TEAM = $(APPLE_TEAM_ID)
+
+// Secure timestamp. Notarisation rejects Developer ID code without one, and it
+// keeps signatures valid after the certificate expires. Ad-hoc signing ignores
+// the flag. Release only: Debug builds then don't need Apple's timestamp
+// server, so they also work offline. Targets that set their own
+// OTHER_CODE_SIGN_FLAGS must start with $(inherited), or this is lost
+// (Scripts/check-signing.sh catches that).
+LULL_TIMESTAMP_FLAGS[config=Release] = --timestamp
+OTHER_CODE_SIGN_FLAGS = $(inherited) $(LULL_TIMESTAMP_FLAGS)
+
+// Xcode adds com.apple.security.get-task-allow (lets a debugger attach) to
+// ad-hoc signed builds, Release included. A Release build must never have it:
+// notarisation rejects it, and it would undo the anti-debugging hardening
+// that keeps users from tampering with the lock screen.
+// Scripts/check-signing.sh checks for it.
+CODE_SIGN_INJECT_BASE_ENTITLEMENTS[config=Release] = NO
+
+// Last, so its values win. "#include?" doesn't fail if the file is missing.
+#include? "Signing.local.xcconfig"

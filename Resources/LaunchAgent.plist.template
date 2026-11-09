@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Lull.app per-session LaunchAgent. Rendered by Scripts/dev-install.sh
+  (and the installer package). Installed at /Library/LaunchAgents/@AGENT_LABEL@.plist,
+  root:wheel 0644, so a standard user can't edit or remove it. lulld re-bootstraps
+  it if a user unloads it with `launchctl bootout`.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>@AGENT_LABEL@</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>@INSTALL_ROOT@/Lull.app/Contents/MacOS/Lull</string>
+    </array>
+    <key>KeepAlive</key>
+    <true/>
+    <key>RunAtLoad</key>
+    <true/>
+    <!-- Relaunch quickly after a kill. VERIFY: launchd may enforce a higher minimum. -->
+    <key>ThrottleInterval</key>
+    <integer>1</integer>
+    <!-- GUI login sessions only (not SSH or loginwindow). -->
+    <key>LimitLoadToSessionType</key>
+    <string>Aqua</string>
+    <key>ProcessType</key>
+    <string>Interactive</string>
+    <key>AssociatedBundleIdentifiers</key>
+    <array>
+        <string>@AGENT_LABEL@</string>
+    </array>
+</dict>
+</plist>

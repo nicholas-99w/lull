@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  DEBUG BUILDS ONLY. Copy to ~/Library/Preferences/au.com.nickit.lull.dev.plist
+  of the user lulld runs as (root: /var/root/Library/Preferences/), or pass
+  `lulld --dev-config <path>`. Release builds ignore this file entirely.
+
+  DebugTimeOffsetSeconds shifts the daemon's trusted time (hot-reloaded), so
+  you can reach a lock without waiting: e.g. set it so "now" is 21:29.
+  Recovery on the test Mac: `sudo touch /var/db/lull/DISABLE` (via SSH).
+-->
+<plist version="1.0">
+<dict>
+    <key>Enabled</key>
+    <true/>
+    <key>Timezone</key>
+    <string>Australia/Sydney</string>
+    <key>Schedules</key>
+    <array>
+        <dict>
+            <key>Name</key>
+            <string>School night</string>
+            <key>Days</key>
+            <array>
+                <string>Mon</string>
+                <string>Tue</string>
+                <string>Wed</string>
+                <string>Thu</string>
+                <string>Sun</string>
+            </array>
+            <key>Start</key>
+            <string>21:30</string>
+            <key>End</key>
+            <string>06:30</string>
+        </dict>
+        <dict>
+            <key>Name</key>
+            <string>Weekend</string>
+            <key>Days</key>
+            <array>
+                <string>Fri</string>
+                <string>Sat</string>
+            </array>
+            <key>Start</key>
+            <string>23:00</string>
+            <key>End</key>
+            <string>07:00</string>
+            <key>WarningMinutes</key>
+            <integer>10</integer>
+        </dict>
+    </array>
+    <key>DateExceptions</key>
+    <array>
+        <dict>
+            <key>StartDate</key>
+            <string>2026-12-19</string>
+            <key>EndDate</key>
+            <string>2027-01-27</string>
+            <key>Mode</key>
+            <string>Skip</string>
+            <key>Note</key>
+            <string>Summer holidays</string>
+        </dict>
+    </array>
+    <key>WarningMinutes</key>
+    <integer>15</integer>
+    <key>SnoozeEnabled</key>
+    <true/>
+    <key>SnoozeMinutes</key>
+    <integer>5</integer>
+    <key>OfflineBootPolicy</key>
+    <string>ForwardOnly</string>
+    <key>DebugTimeOffsetSeconds</key>
+    <integer>0</integer>
+</dict>
+</plist>

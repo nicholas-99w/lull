@@ -1,0 +1,80 @@
+name: Lull
+options:
+  bundleIdPrefix: au.com.nickit
+  deploymentTarget:
+    macOS: "13.0"
+  createIntermediateGroups: true
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
+settings:
+  base:
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+    SWIFT_VERSION: "5.0"
+    ENABLE_HARDENED_RUNTIME: YES
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "13"
+  configs:
+    Release:
+      ARCHS: arm64   # Apple silicon only
+      ONLY_ACTIVE_ARCH: NO
+packages:
+  LullCore:
+    path: .
+targets:
+  Lull:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/Lull
+      - Resources/Assets.xcassets   # app icon (master artwork: Resources/Icon/lull-icon.svg)
+    info:
+      path: Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Lull
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSUIElement: true
+        LSMinimumSystemVersion: "13.0"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(LULL_BUNDLE_ID_PREFIX).lull
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    dependencies:
+      - package: LullCore
+        product: LullCore
+      - package: LullCore
+        product: LullAgentKit
+  lulld:
+    type: tool
+    platform: macOS
+    sources: [Sources/lulld]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(LULL_BUNDLE_ID_PREFIX).lulld
+        # Bare tools have no Info.plist, so codesign would invent an identifier
+        # ("lulld-<hash>"). XPC code-signing requirements pin the identifier
+        # (SECURITY.md > How the parts trust each other), so make it stable and explicit.
+        OTHER_CODE_SIGN_FLAGS: $(inherited) --identifier $(PRODUCT_BUNDLE_IDENTIFIER)
+    dependencies:
+      - package: LullCore
+        product: LullCore
+      - package: LullCore
+        product: LullDaemonKit
+  lullctl:
+    type: tool
+    platform: macOS
+    sources: [Sources/lullctl]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(LULL_BUNDLE_ID_PREFIX).lullctl
+        # Bare tools have no Info.plist, so codesign would invent an identifier
+        # ("lullctl-<hash>"). XPC code-signing requirements pin the identifier
+        # (SECURITY.md > How the parts trust each other), so make it stable and explicit.
+        OTHER_CODE_SIGN_FLAGS: $(inherited) --identifier $(PRODUCT_BUNDLE_IDENTIFIER)
+    dependencies:
+      - package: LullCore
+        product: LullCore
+      - package: LullCore
+        product: LullDaemonKit

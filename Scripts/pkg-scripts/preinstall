@@ -1,0 +1,30 @@
+#!/bin/bash
+# Lull package preinstall: stop the running daemon and agents so
+# files can be replaced cleanly. postinstall starts the new version.
+#
+# Upgrading while locked leaves a gap of a few seconds with no overlay; the
+# daemon persists trusted time on SIGTERM, so nothing else is lost.
+# Fails only on Intel Macs (Lull is built for Apple silicon only); a job that
+# isn't loaded is the normal fresh-install case.
+
+DAEMON_LABEL="au.com.nickit.lulld"
+AGENT_LABEL="au.com.nickit.lull"
+TARGET="${3:-/}"
+
+# Only touch the running system when installing onto it.
+[[ "$TARGET" == "/" ]] || exit 0
+
+# arm64-only binaries can't run on Intel: fail here, before stopping anything,
+# so a Jamf policy reports the error instead of installing a daemon that can't
+# start. hw.optional.arm64 is 1 on Apple silicon, even under Rosetta.
+if [[ "$(/usr/sbin/sysctl -n hw.optional.arm64 2>/dev/null)" != "1" ]]; then
+    echo "Lull requires an Apple silicon Mac" >&2
+    exit 1
+fi
+
+/bin/launchctl bootout "system/$DAEMON_LABEL" 2>/dev/null
+for uid in $(/bin/ps -axo uid=,comm= | /usr/bin/awk '$2 ~ /loginwindow$/ {print $1}' | /usr/bin/sort -u); do
+    [[ "$uid" -eq 0 ]] && continue
+    /bin/launchctl bootout "gui/$uid/$AGENT_LABEL" 2>/dev/null
+done
+exit 0

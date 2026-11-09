@@ -1,0 +1,22 @@
+// Developer ID signing for this Mac. Copy to Config/Signing.local.xcconfig
+// (gitignored) and replace the placeholders. Xcode reads it through
+// Signing.xcconfig. Scripts/make-pkg.sh, Scripts/notarize.sh and
+// Scripts/check-signing.sh read it too (a variable of the same name in the
+// environment wins).
+//
+// List your identities with:
+//   security find-identity -v -p codesigning   (Developer ID Application)
+//   security find-identity -v -p basic         (Developer ID Installer)
+
+// Release builds only. Debug builds stay ad-hoc: they're for test Macs, and
+// they work offline because they don't need Apple's timestamp server.
+APPLE_TEAM_ID[config=Release] = ABCDE12345
+SIGNING_IDENTITY[config=Release] = Developer ID Application: Your Name (ABCDE12345)
+
+// Signs the .pkg (Scripts/make-pkg.sh). Leave it empty for an unsigned package.
+INSTALLER_IDENTITY = Developer ID Installer: Your Name (ABCDE12345)
+
+// The notarytool keychain profile, created once with:
+//   xcrun notarytool store-credentials lull-notary --apple-id <Apple ID> --team-id ABCDE12345
+// `make dist` notarises and staples signed packages with it.
+NOTARY_PROFILE = lull-notary

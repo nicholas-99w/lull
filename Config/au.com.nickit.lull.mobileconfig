@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Example Lull configuration profile: every key, realistic sample values.
+  Payload: com.apple.ManagedClient.preferences, domain au.com.nickit.lull,
+  device scope (PayloadScope System). See Docs/CONFIGURATION.md.
+
+  Before deploying:
+  - Prefer building the profile in Jamf Pro > Application & Custom Settings with
+    Config/jamf-custom-schema.json (editable in the Jamf UI). Uploading this file
+    also works; Jamf may ask to re-sign it.
+  - OverridePasswordHash below is the hash of a random passphrase nobody knows, so
+    the override is unusable until you replace it (`lullctl hash-passphrase`), or
+    delete the key and use the root-only /var/db/lull/override.json instead (preferred).
+  - Images are file names inside /Library/Application Support/Lull/Branding/;
+    deploy them separately. Missing images are simply not shown.
+  - Check it: lullctl validate-config <a plist containing just the settings dict>.
+-->
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadType</key>
+			<string>com.apple.ManagedClient.preferences</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>PayloadIdentifier</key>
+			<string>au.com.nickit.lull.settings.84DBD6E8-9CA0-4BF1-B30F-8D924E5E631D</string>
+			<key>PayloadUUID</key>
+			<string>84DBD6E8-9CA0-4BF1-B30F-8D924E5E631D</string>
+			<key>PayloadDisplayName</key>
+			<string>Lull settings</string>
+			<key>PayloadEnabled</key>
+			<true/>
+			<key>PayloadContent</key>
+			<dict>
+				<key>au.com.nickit.lull</key>
+				<dict>
+					<key>Forced</key>
+					<array>
+						<dict>
+							<key>mcx_preference_settings</key>
+							<dict>
+								<key>Enabled</key>
+								<true/>
+								<key>Timezone</key>
+								<string>Australia/Sydney</string>
+								<key>Schedules</key>
+								<array>
+									<dict>
+										<key>Name</key>
+										<string>School night</string>
+										<key>Days</key>
+										<array>
+											<string>Mon</string>
+											<string>Tue</string>
+											<string>Wed</string>
+											<string>Thu</string>
+											<string>Fri</string>
+										</array>
+										<key>Start</key>
+										<string>21:30</string>
+										<key>End</key>
+										<string>06:30</string>
+									</dict>
+									<dict>
+										<key>Name</key>
+										<string>Weekend</string>
+										<key>Days</key>
+										<array>
+											<string>Sat</string>
+											<string>Sun</string>
+										</array>
+										<key>Start</key>
+										<string>23:00</string>
+										<key>End</key>
+										<string>07:00</string>
+										<key>WarningMinutes</key>
+										<integer>10</integer>
+									</dict>
+								</array>
+								<key>DateExceptions</key>
+								<array>
+									<dict>
+										<key>StartDate</key>
+										<string>2026-12-18</string>
+										<key>EndDate</key>
+										<string>2027-01-27</string>
+										<key>Mode</key>
+										<string>Skip</string>
+										<key>Note</key>
+										<string>Summer holidays</string>
+									</dict>
+									<dict>
+										<key>StartDate</key>
+										<string>2026-11-20</string>
+										<key>EndDate</key>
+										<string>2026-11-20</string>
+										<key>Mode</key>
+										<string>AllDay</string>
+										<key>Note</key>
+										<string>Device-free day</string>
+									</dict>
+								</array>
+								<key>WarningMinutes</key>
+								<integer>15</integer>
+								<key>WarningIntervalsMinutes</key>
+								<array>
+									<integer>15</integer>
+									<integer>10</integer>
+									<integer>5</integer>
+									<integer>2</integer>
+									<integer>1</integer>
+								</array>
+								<key>FinalCountdownSeconds</key>
+								<integer>60</integer>
+								<key>SnoozeEnabled</key>
+								<true/>
+								<key>SnoozeMinutes</key>
+								<integer>10</integer>
+								<key>MaxSnoozesPerWindow</key>
+								<integer>1</integer>
+								<key>ExemptUsernames</key>
+								<array>
+									<string>itadmin</string>
+								</array>
+								<key>ExemptAdminUsers</key>
+								<true/>
+								<key>OverrideEnabled</key>
+								<true/>
+								<key>OverrideDurationMinutes</key>
+								<integer>30</integer>
+								<key>OverrideMaxAttempts</key>
+								<integer>5</integer>
+								<key>OverrideLockoutMinutes</key>
+								<integer>15</integer>
+								<key>OverridePasswordHash</key>
+								<!-- PLACEHOLDER: hash of 'replace-this-example-passphrase'. Never deploy it.
+								     Make your own: lullctl hash-passphrase (or use override.json; see Docs/DEPLOYMENT.md). -->
+								<string>pbkdf2-sha256$600000$bHVsbC1leGFtcGxlLXNhbA==$w+NCdogVcMHhEx1Wxks/riWEqBKzmshjtgXAE/OEwLQ=</string>
+								<key>TimeServers</key>
+								<array>
+									<string>time.apple.com</string>
+									<string>time.asia.apple.com</string>
+								</array>
+								<key>TimeSyncIntervalMinutes</key>
+								<integer>60</integer>
+								<key>MaxClockDriftSeconds</key>
+								<integer>30</integer>
+								<key>OfflineBootPolicy</key>
+								<string>ForwardOnly</string>
+								<key>FallbackActionIfAgentMissing</key>
+								<string>SleepDisplay</string>
+								<key>AgentMissingGraceSeconds</key>
+								<integer>5</integer>
+								<key>ShowShutdownButton</key>
+								<true/>
+								<key>Appearance</key>
+								<dict>
+									<key>BannerImagePath</key>
+									<string>banner.png</string>
+									<key>BannerHeight</key>
+									<integer>180</integer>
+									<key>BannerContentMode</key>
+									<string>fill</string>
+									<key>LogoImagePath</key>
+									<string>logo.png</string>
+									<key>BackgroundStyle</key>
+									<string>Blur</string>
+									<key>BackgroundColor</key>
+									<string>#0B1F3A</string>
+									<key>BackgroundOpacity</key>
+									<real>0.7</real>
+									<key>BackgroundImagePath</key>
+									<string>background.jpg</string>
+									<key>CardBackgroundColor</key>
+									<string>#FFFFFF</string>
+									<key>CardBackgroundColorDark</key>
+									<string>#14223A</string>
+									<key>CardCornerRadius</key>
+									<integer>18</integer>
+									<key>CardWidth</key>
+									<integer>600</integer>
+									<key>TitleColor</key>
+									<string>#0B1F3A</string>
+									<key>TitleColorDark</key>
+									<string>#F2F5FA</string>
+									<key>BodyColor</key>
+									<string>#33415C</string>
+									<key>BodyColorDark</key>
+									<string>#C9D2E3</string>
+									<key>AccentColor</key>
+									<string>#1F7A8C</string>
+									<key>AccentColorDark</key>
+									<string>#3FB0C4</string>
+									<key>CountdownColor</key>
+									<string>#1F7A8C</string>
+									<key>CountdownColorDark</key>
+									<string>#3FB0C4</string>
+									<key>ProgressTrackColor</key>
+									<string>#E1E8EF</string>
+									<key>ProgressTrackColorDark</key>
+									<string>#2B3A52</string>
+									<key>BackgroundColorDark</key>
+									<string>#000000</string>
+									<key>FontName</key>
+									<string></string>
+									<key>TitleFontSize</key>
+									<integer>28</integer>
+									<key>BodyFontSize</key>
+									<integer>15</integer>
+									<key>ShowCountdown</key>
+									<true/>
+									<key>ShowProgress</key>
+									<true/>
+									<key>ShowBannerInWarning</key>
+									<true/>
+									<key>WarningCardPosition</key>
+									<string>TopRight</string>
+								</dict>
+								<key>Texts</key>
+								<dict>
+									<key>OrganizationName</key>
+									<string>Example College</string>
+									<key>SupportContact</key>
+									<string>the IT Service Desk (ext. 1234)</string>
+									<key>WarningTitle</key>
+									<string>Downtime in {{minutesRemaining}} min</string>
+									<key>WarningMessage</key>
+									<string>This Mac locks at {{startTime}}. Save your work now.</string>
+									<key>LockedTitle</key>
+									<string>Time to rest, {{firstName}}</string>
+									<key>LockedMessage</key>
+									<string>Devices at {{organizationName}} are offline during {{scheduleName}} hours.</string>
+									<key>UnlockLabel</key>
+									<string>Back online at {{endTime}}</string>
+									<key>FooterText</key>
+									<string>{{organizationName}} · Digital Wellbeing</string>
+									<key>SupportText</key>
+									<string>Need this Mac urgently? Contact {{supportContact}}.</string>
+									<key>OverrideButtonLabel</key>
+									<string>Admin override</string>
+									<key>SnoozeButtonLabel</key>
+									<string>Snooze 10 min</string>
+									<key>ShutdownButtonLabel</key>
+									<string>Shut Down</string>
+								</dict>
+								<!-- Optional parent portal: your lull-portal's https URL. Empty = portal
+								     off, and this profile's Schedules apply. -->
+								<key>Portal</key>
+								<dict>
+									<key>URL</key>
+									<string></string>
+									<key>PollIntervalSeconds</key>
+									<integer>300</integer>
+								</dict>
+							</dict>
+						</dict>
+					</array>
+				</dict>
+			</dict>
+		</dict>
+	</array>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+	<key>PayloadIdentifier</key>
+	<string>au.com.nickit.lull.profile.4A723078-B19F-4F49-9CAF-66CA6E6CA67B</string>
+	<key>PayloadUUID</key>
+	<string>4A723078-B19F-4F49-9CAF-66CA6E6CA67B</string>
+	<key>PayloadDisplayName</key>
+	<string>Lull: downtime hours</string>
+	<key>PayloadDescription</key>
+	<string>Device-free hours for school Macs.</string>
+	<key>PayloadOrganization</key>
+	<string>Example College</string>
+	<key>PayloadScope</key>
+	<string>System</string>
+	<key>PayloadRemovalDisallowed</key>
+	<true/>
+</dict>
+</plist>

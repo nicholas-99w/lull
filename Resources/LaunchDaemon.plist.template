@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  lulld LaunchDaemon. Rendered by Scripts/dev-install.sh (and the
+  installer package): @DAEMON_LABEL@, @AGENT_LABEL@ and @INSTALL_ROOT@ are replaced.
+  Installed at /Library/LaunchDaemons/@DAEMON_LABEL@.plist, root:wheel 0644.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>@DAEMON_LABEL@</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>@INSTALL_ROOT@/bin/lulld</string>
+    </array>
+    <!-- Agents connect here over XPC. -->
+    <key>MachServices</key>
+    <dict>
+        <key>@DAEMON_LABEL@</key>
+        <true/>
+    </dict>
+    <!-- Always running: relaunched by launchd if it exits or is killed. -->
+    <key>KeepAlive</key>
+    <true/>
+    <key>RunAtLoad</key>
+    <true/>
+    <!-- Lists lulld under "Lull" in Login Items rather than under the signer's
+         name. Confirmed on a test Mac. -->
+    <key>AssociatedBundleIdentifiers</key>
+    <array>
+        <string>@AGENT_LABEL@</string>
+    </array>
+    <key>StandardOutPath</key>
+    <string>/var/log/lull/lulld.stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/var/log/lull/lulld.stderr.log</string>
+</dict>
+</plist>
